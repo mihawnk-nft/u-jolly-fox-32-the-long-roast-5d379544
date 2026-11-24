@@ -20,6 +20,17 @@ ROAST = (
 MAX_CHARS = 200
 
 
+def write_entry(text: str, out_dir: str) -> str:
+    """Write the entry atomically (temp file + os.replace)."""
+    os.makedirs(out_dir, exist_ok=True)
+    path = os.path.join(out_dir, "entry.txt")
+    tmp_path = path + ".tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp_path, path)
+    return path
+
+
 def main() -> int:
     text = ROAST.strip()
     if not text:
@@ -32,10 +43,7 @@ def main() -> int:
         )
         return 1
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(text)
+    path = write_entry(text, out_dir)
     print(f"wrote {path} ({len(text)} chars)")
     print(text)
     return 0
